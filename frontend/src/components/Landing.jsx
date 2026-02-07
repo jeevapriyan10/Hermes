@@ -34,7 +34,7 @@ export default function Landing({ onGetStarted, onBrowseFeed }) {
                 <div className="container">
                     <div className="grid grid-4">
                         <div className="stat-card">
-                            <div className="stat-value">Gemini 2.5</div>
+                            <div className="stat-value">Gemini 3</div>
                             <div className="stat-label">Flash</div>
                         </div>
                         <div className="stat-card">
@@ -68,7 +68,7 @@ export default function Landing({ onGetStarted, onBrowseFeed }) {
                             </div>
                             <h4 className="mb-sm">AI-Powered Analysis</h4>
                             <p className="text-secondary text-sm">
-                                Advanced Gemini 2.5 models trained to detect misinformation with high accuracy
+                                Advanced Gemini 3 models trained to detect misinformation with high accuracy
                             </p>
                         </div>
 

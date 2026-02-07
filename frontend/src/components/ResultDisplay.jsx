@@ -109,7 +109,7 @@ export default function ResultDisplay({ result, loading }) {
             {/* Info about dashboard */}
             {isMisinformation && (
                 <div className="alert alert-info">
-                    <p className="text-sm">✨ This detection has been added to the community dashboard where you can upvote it!</p>
+                    <p className="text-sm"> This detection has been added to the community dashboard where you can upvote it!</p>
                 </div>
             )}
         </div>

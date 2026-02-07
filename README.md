@@ -1,185 +1,314 @@
-# Hermes AI - Misinformation Detection Platform
+# Hermes
+AI-Powered Misinformation Detection Platform
 
-![Hermes Logo](./frontend/public/favicon.png)
+A comprehensive fact-checking system powered by Google's Gemini 3 Flash AI with semantic clustering, category-based filtering, and real-time misinformation detection.
 
-**AI-powered fact-checking and misinformation detection platform built with Gemini 3 Flash**
+## Features
 
-## 🎯 Features
+- **AI-Powered Analysis**: Gemini 3 Flash integration for intelligent content verification with confidence scoring
+- **Content Filtering**: Pre-validation to reject spam, personal attacks, and non-news content
+- **Semantic Clustering**: Automatic duplicate detection using AI similarity analysis
+- **Category Organization**: 9 color-coded categories (Politics, Health, Science, Climate, Technology, Finance, Entertainment, etc.)
+- **Social Browsing**: Browse and upvote misinformation without mandatory submissions
+- **Real-Time Updates**: Relative timestamps ("5m ago", "3h ago") across all views
+- **CSV Export**: Download reports with top 5 trending + last 25 recent detections
+- **Mobile Responsive**: Three-tab navigation with hamburger menu for mobile devices
 
-- ✅ **Content Filtering** - AI validates content before fact-checking (rejects spam, attacks, etc.)
-- ✅ **Category-Based Grouping** - 9 color-coded categories (Politics, Health, Science, etc.)
-- ✅ **Three-Tab Navigation** - Fact Check | Feed | Trending (mobile responsive)
-- ✅ **Social Browse Mode** - Browse feed and upvote without mandatory submission
-- ✅ **Enhanced Timestamps** - Relative time display ("5m ago", "3h ago")
-- ✅ **Duplicate Detection** - AI semantic similarity clustering
-- ✅ **CSV Export** - Download top 5 trending + last 25 recent detections
+## Tech Stack
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18+ and npm
-- MongoDB (local or Atlas)
-- Gemini API key ([Get one here](https://aistudio.google.com/apikey))
-
-### Local Development
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/hermes-ai.git
-cd hermes-ai
-
-# 2. Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
-
-# 3. Configure backend environment
-cd ../backend
-cp .env.example .env
-# Edit .env and add your:
-# - MONGO_URI
-# - GEMINI_API_KEY
-
-# 4. Run backend (Terminal 1)
-npm run dev
-
-# 5. Run frontend (Terminal 2)
-cd ../frontend
-npm run dev
-
-# 6. Open browser
-# http://localhost:5173
-```
-
-## 📦 Project Structure
-
-```
-hermes/
-├── backend/
-│   ├── index.js              # Express server
-│   ├── routes/
-│   │   ├── verify.js         # Fact-check endpoint
-│   │   ├── dashboard.js      # Feed data
-│   │   ├── trending.js       # Trending endpoint
-│   │   └── export.js         # CSV export
-│   ├── services/
-│   │   ├── aiService.js      # Gemini AI integration
-│   │   └── similarityService.js  # Duplicate detection
-│   └── package.json
-│
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx           # Main app + navigation
-│   │   ├── components/
-│   │   │   ├── Landing.jsx   # Homepage
-│   │   │   ├── VerificationForm.jsx
-│   │   │   ├── Feed.jsx      # Feed with categories
-│   │   │   ├── Trending.jsx  # Trending view
-│   │   │   └── MessageCluster.jsx
-│   │   └── styles/
-│   │       └── index.css     # Global styles
-│   └── package.json
-│
-└── README.md
-```
-
-## 🌐 Deployment
-
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete step-by-step instructions to deploy on Render.com.
-
-### Quick Deploy to Render
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
-
-1. Fork this repository
-2. Create MongoDB Atlas database
-3. Connect to Render
-4. Add environment variables
-5. Deploy!
-
-**Required Environment Variables:**
-```env
-PORT=4000
-NODE_ENV=production
-MONGO_URI=mongodb+srv://...
-MONGO_DB_NAME=hermes_ai
-GEMINI_API_KEY=AIza...
-CORS_ORIGIN=https://your-app.onrender.com
-```
-
-## 🧪 Testing
-
-### Test Fact-Checking
-1. Go to "Fact Check" tab
-2. Submit: "The Earth is flat"
-3. AI analyzes and returns verdict
-
-### Test Content Filtering
-1. Submit: "You idiot!" → Rejected as personal attack
-2. Submit: "Buy my product!" → Rejected as spam
-3. Submit news → Analyzes successfully
-
-### Test Categories
-1. Go to "Feed" tab
-2. Click category buttons (Politics, Health, Science)
-3. Feed filters to show only that category
-
-### Test Export
-1. Click "Export CSV" button
-2. Downloads CSV with top 5 trending + last 25 recent
-
-## 🛠️ Tech Stack
-
-### Backend
+**Backend:**
 - Node.js + Express
 - MongoDB + Mongoose
-- Gemini 3 Flash API
-- Axios, Helmet, CORS
+- Google Gemini 3 Flash API
+- Axios for HTTP requests
+- Security: Helmet, CORS, Rate Limiting
 
-### Frontend
-- React + Vite
-- Lucide React (icons)
-- CSS Variables (theming)
+**Frontend:**
+- React 18 + Vite
+- Lucide React icons
+- Vanilla CSS (modern dark theme)
 - Mobile-first responsive design
 
-## 📊 API Endpoints
+## Project Structure
+
+```
+Hermes/
+├── backend/                    # Express API server
+│   ├── routes/
+│   │   ├── verify.js          # Fact-checking endpoint
+│   │   ├── dashboard.js       # Feed data
+│   │   ├── trending.js        # Trending items
+│   │   ├── upvote.js          # Upvote handling
+│   │   └── export.js          # CSV export
+│   ├── services/
+│   │   ├── aiService.js       # Gemini AI integration
+│   │   └── similarityService.js  # Duplicate detection
+│   ├── index.js               # Server entry point
+│   └── package.json
+│
+├── frontend/                   # React application
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Landing.jsx    # Homepage
+│   │   │   ├── VerificationForm.jsx
+│   │   │   ├── ResultDisplay.jsx
+│   │   │   ├── Feed.jsx       # Feed with categories
+│   │   │   ├── Trending.jsx   # Trending view
+│   │   │   └── MessageCluster.jsx
+│   │   ├── styles/
+│   │   │   └── index.css      # Global styles
+│   │   ├── App.jsx            # Main app + navigation
+│   │   └── main.jsx           # Entry point
+│   ├── index.html
+│   └── package.json
+│
+├── README.md
+└── render.yaml                 # Render.com deployment config
+```
+
+## Quick Start
+
+### Prerequisites
+- Node.js >= 18.0.0
+- MongoDB (local or Atlas)
+- Gemini API key ([Get one here](https://aistudio.google.com/apikey))
+- npm >= 9.0.0
+
+### Installation
+
+#### Backend Setup
+```bash
+cd backend
+npm install
+
+# Create .env file
+copy .env.example .env
+# Edit .env with your MongoDB URI and Gemini API key
+```
+
+#### Frontend Setup
+```bash
+cd frontend
+npm install
+
+# Create .env file (optional, defaults to localhost:4000)
+copy .env.example .env
+```
+
+### Running Locally
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+npm run dev
+# Server runs on http://localhost:4000
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+# App runs on http://localhost:5173
+```
+
+## Environment Variables
+
+### Backend (.env):
+```env
+PORT=4000
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB_NAME=hermes_ai
+GEMINI_API_KEY=your_gemini_api_key
+GROK_API_KEY=your_grok_api_key (optional fallback)
+CORS_ORIGIN=http://localhost:5173
+```
+
+### Frontend (.env):
+```env
+VITE_BACKEND_URL=http://localhost:4000
+VITE_API_URL=http://localhost:4000/api
+```
+
+### Production (.env.production):
+```env
+VITE_BACKEND_URL=https://your-app.onrender.com
+VITE_API_URL=https://your-app.onrender.com/api
+```
+
+## Usage Guide
+
+### 1. Submit Content for Fact-Checking
+
+1. Navigate to the app and click **"Fact Check"** tab
+2. Enter news or factual claim in the text area (max 5000 characters)
+3. Click **"Verify Text"**
+4. AI analyzes the content and returns:
+   - **Verdict**: Reliable or Misinformation
+   - **Confidence Score**: 0-100%
+   - **Category**: Auto-detected (Politics, Health, Science, etc.)
+   - **Explanation**: Detailed reasoning
+
+**Note**: Content is pre-validated. The following will be rejected:
+- Personal attacks or insults
+- Hate speech
+- Spam or promotional content
+- Threats or cyberbullying
+
+### 2. Browse the Feed
+
+1. Click **"Feed"** tab or "Browse Feed" from homepage
+2. View all detected misinformation organized by category
+3. **Filter by Category**:
+   - Click any category button (Politics, Health, Science, etc.)
+   - See color-coded indicator and item count
+   - Feed updates to show only that category
+4. **Upvote** items to flag widespread misinformation
+5. **Export Data**:
+   - Click "Export CSV" button
+   - Downloads report with top 5 trending + last 25 recent
+
+### 3. View Trending Misinformation
+
+1. Navigate to **"Trending"** tab
+2. **Filter by Time Period**:
+   - 24 Hours
+   - 7 Days
+   - 30 Days
+3. **Sort by**:
+   - Most Upvoted
+   - Most Recent
+   - Highest Confidence
+4. See variation counts for clustered similar messages
+
+### 4. Social Features
+
+- **Browse Without Submitting**: Explore feed without fact-checking
+- **Upvote System**: Help identify widespread misinformation
+- **Duplicate Detection**: Similar messages automatically clustered
+- **Variation Counts**: See how many times similar claims appeared
+
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/verify` | Fact-check content |
-| GET | `/api/dashboard` | Get feed items |
-| GET | `/api/trending` | Get trending items |
-| POST | `/api/upvote` | Upvote an item |
-| GET | `/api/export` | Export CSV report |
-| GET | `/health` | Health check |
+| POST | `/api/verify` | Submit text for fact-checking |
+| GET | `/api/dashboard` | Get feed items with filters |
+| GET | `/api/trending` | Get trending items (period + sort) |
+| POST | `/api/upvote` | Upvote a misinformation item |
+| GET | `/api/export` | Download CSV report |
+| GET | `/health` | Health check endpoint |
 
-## 🎨 UI/UX
+### Example: Verify Content
 
-- Clean, professional design
-- Mobile-first responsive
-- Color-coded categories
-- Real-time relative timestamps
-- Smooth animations
-- Minimal and modern
+**Request:**
+```bash
+POST /api/verify
+Content-Type: application/json
 
-## 🔐 Security
+{
+  "text": "The Earth is flat and NASA is lying to us"
+}
+```
 
-- Helmet.js for security headers
-- CORS configuration
-- Rate limiting on API endpoints
-- Environment variable protection
-- Content validation before processing
+**Response:**
+```json
+{
+  "verdict": "misinformation",
+  "confidence": 0.98,
+  "category": "science",
+  "explanation": "This claim contradicts overwhelming scientific evidence...",
+  "timestamp": "2026-02-07T15:54:32.123Z",
+  "clusterId": "cluster_abc123",
+  "isClusterHead": true,
+  "variations": 3
+}
+```
 
-## 📈 Scaling
+## Deployment
 
-- Free tier: 512 MB MongoDB, 750 hrs/month
-- Upgrade to Starter ($7/mo) for always-on
-- MongoDB Atlas auto-scaling available
+### Deploy to Render.com
 
-## 📝 License
+1. **Setup MongoDB Atlas** (Free):
+   - Create cluster at https://mongodb.com/cloud/atlas
+   - Add database user and get connection string
 
-MIT License - feel free to use for your own projects!
+2. **Push to GitHub**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/YOUR_USERNAME/hermes.git
+   git push -u origin main
+   ```
 
-## 🤝 Contributing
+3. **Deploy on Render**:
+   - Go to https://render.com
+   - New → Web Service
+   - Connect GitHub repository
+   - Configure:
+     - **Build Command**: `cd frontend && npm install && npm run build && cd ../backend && npm install`
+     - **Start Command**: `cd backend && node index.js`
+   - Add environment variables (see above)
+   - Click "Create Web Service"
+
+**Detailed Instructions**: See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) or [DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md)
+
+## AI Features Explained
+
+### Content Validation
+Before fact-checking, AI validates content type:
+- ✅ **Allowed**: News, factual claims, public information
+- ❌ **Rejected**: Personal attacks, spam, hate speech, threats
+
+### Semantic Similarity Detection
+AI compares new submissions with existing database:
+1. Generates embeddings for content
+2. Calculates cosine similarity
+3. If similarity > 85%, clusters messages together
+4. Creates common template for grouped messages
+
+### Category Classification
+AI automatically categorizes content into:
+- Politics
+- Health
+- Science
+- Climate
+- Technology
+- Finance
+- Entertainment
+- General
+
+## Security Features
+
+- **Helmet.js**: Security headers protection
+- **CORS**: Configured cross-origin resource sharing
+- **Rate Limiting**: API endpoint protection
+- **Environment Variables**: Sensitive data protection
+- **Input Validation**: Content length and format validation
+
+## Performance & Scaling
+
+**Free Tier (MongoDB Atlas + Render):**
+- 512 MB database storage
+- 750 hours/month uptime
+- Auto-sleeps after 15 min inactivity
+
+**Recommended for Production:**
+- Render Starter Plan: $7/month (always on)
+- MongoDB Atlas M2: $9/month (2GB storage)
+- Total: ~$16/month for production-ready app
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| API errors | Check Gemini API key validity |
+| 502 Bad Gateway | Verify MongoDB connection string |
+| CORS errors | Update CORS_ORIGIN to match exact URL |
+| Content rejected | Ensure submission is news/factual claim |
+| No data in feed | Submit fact-checks to populate database |
+
+## Contributing
 
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/amazing-feature`)
@@ -187,10 +316,26 @@ MIT License - feel free to use for your own projects!
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
 
-## 📧 Contact
+## License
 
-Built by Jeeva | [GitHub](https://github.com/YOUR_USERNAME)
+MIT License - feel free to use for your own projects!
+
+## Acknowledgments
+
+- **Google Gemini 3 Flash** - AI-powered analysis
+- **MongoDB** - Database storage
+- **Render.com** - Hosting platform
+- **Lucide React** - Icon library
+
+## Contact
+
+Created by **jeevapriyan10**
+
+- GitHub: [@jeevapriyan10](https://github.com/jeevapriyan10)
+- Project Link: [https://github.com/jeevapriyan10/Hermes](https://github.com/jeevapriyan10/Hermes)
 
 ---
 
-⭐ Star this repo if you find it helpful!
+⭐ **Star this repository** if you find it helpful!
+
+🚀 **Live Demo**: [https://hermes-ai.onrender.com](https://hermes-ai.onrender.com) (update with your deployed URL)
