@@ -34,6 +34,8 @@ router.get('/', async (req, res) => {
 
         res.json({
             items: allItems,
+            totalDetections: stats[0]?.total || 0,
+            totalUpvotes: stats[0]?.totalUpvotes || 0,
             stats: {
                 total: stats[0]?.total || 0,
                 totalUpvotes: stats[0]?.totalUpvotes || 0,

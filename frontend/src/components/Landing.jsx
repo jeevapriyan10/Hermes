@@ -1,7 +1,7 @@
 import React from 'react';
 import { Shield, AlertTriangle, TrendingUp, Users, ArrowRight, Check } from 'lucide-react';
 
-export default function Landing({ onGetStarted }) {
+export default function Landing({ onGetStarted, onBrowseFeed }) {
     return (
         <div>
             {/* Hero Section */}
@@ -15,11 +15,14 @@ export default function Landing({ onGetStarted }) {
                         </h1>
                         <p style={{ fontSize: '1.125rem', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
                             Verify text content for accuracy and reliability using advanced AI analysis.
-                            Real-time detection with confidence scores and categorization.
+                            Or browse the global feed of detected misinformation.
                         </p>
                         <div className="flex justify-center gap-md">
-                            <button onClick={onGetStarted} className="btn btn-primary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
-                                Get Started <ArrowRight size={20} />
+                            <button onClick={onBrowseFeed} className="btn btn-primary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
+                                Browse Feed <TrendingUp size={20} />
+                            </button>
+                            <button onClick={onGetStarted} className="btn btn-secondary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
+                                Fact Check <ArrowRight size={20} />
                             </button>
                         </div>
                     </div>
@@ -171,13 +174,18 @@ export default function Landing({ onGetStarted }) {
             <section style={{ padding: '4rem 0' }}>
                 <div className="container">
                     <div className="card text-center" style={{ maxWidth: '700px', margin: '0 auto', background: 'var(--surface)' }}>
-                        <h2 className="mb-md">Ready to verify content?</h2>
+                        <h2 className="mb-md">Ready to get started?</h2>
                         <p className="text-secondary mb-xl" style={{ fontSize: '1.125rem' }}>
-                            Start detecting misinformation with AI-powered analysis
+                            Browse the global misinformation feed or submit content for fact-checking
                         </p>
-                        <button onClick={onGetStarted} className="btn btn-primary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
-                            Start Analyzing <ArrowRight size={20} />
-                        </button>
+                        <div className="flex justify-center gap-md">
+                            <button onClick={onBrowseFeed} className="btn btn-primary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
+                                Browse Feed <TrendingUp size={20} />
+                            </button>
+                            <button onClick={onGetStarted} className="btn btn-secondary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
+                                Fact Check <ArrowRight size={20} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>

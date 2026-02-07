@@ -1,6 +1,58 @@
 const axios = require('axios');
 
 /**
+ * Validate if content is appropriate for fact-checking (news/informational only)
+ */
+const validateContent = async (text) => {
+    try {
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        if (!apiKey || apiKey.includes('your_gemini')) {
+            return { isValid: true, contentType: 'unknown', rejectionReason: null };
+        }
+
+        const response = await axios.post(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
+            {
+                contents: [{
+                    parts: [{
+                        text: `You are a content moderator. Classify this text and determine if it's appropriate for fact-checking.
+
+ONLY ALLOW: News, factual claims, public information, historical events, scientific statements, political statements, health information
+
+REJECT: Personal attacks, hate speech, threats, harassment, doxxing, spam, promotional content, private conversations, trash talk, cyberbullying
+
+Respond ONLY with valid JSON:
+{"isValid": boolean, "contentType": "news"|"personal_attack"|"hate_speech"|"threat"|"spam"|"promotional"|"private"|"cyberbullying"|"unknown", "rejectionReason": "Brief explanation if rejected, null if valid"}
+
+Text: "${text.replace(/"/g, '\\"')}"`
+                    }]
+                }],
+                generationConfig: { temperature: 0.2, maxOutputTokens: 200 }
+            },
+            { headers: { 'Content-Type': 'application/json' }, timeout: 10000 }
+        );
+
+        const content = response.data.candidates[0].content.parts[0].text;
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+
+        if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
+            return {
+                isValid: Boolean(result.isValid),
+                contentType: result.contentType || 'unknown',
+                rejectionReason: result.rejectionReason || null
+            };
+        }
+
+        return { isValid: true, contentType: 'unknown', rejectionReason: null };
+    } catch (error) {
+        console.error('⚠️  Content validation error:', error.message);
+        return { isValid: true, contentType: 'unknown', rejectionReason: null };
+    }
+};
+
+/**
  * Call Gemini API for misinformation detection
  */
 const callGeminiAPI = async (text) => {
@@ -12,7 +64,7 @@ const callGeminiAPI = async (text) => {
         }
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
             {
                 contents: [
                     {
@@ -115,6 +167,7 @@ const analyzeText = async (text) => {
 };
 
 module.exports = {
+    validateContent,
     callGeminiAPI,
     callGrokAPI,
     analyzeText,

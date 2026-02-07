@@ -617,6 +617,72 @@ tbody tr:hover {
     }
 }
 
+/* Mobile Navigation */
+.desktop-nav {
+    display: flex;
+}
+
+.mobile-menu-btn {
+    display: none;
+}
+
+.mobile-nav {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .desktop-nav {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .mobile-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .mobile-nav .tab {
+        width: 100%;
+        justify-content: flex-start;
+        border-bottom: none;
+        border-left: 2px solid transparent;
+        padding-left: 1rem;
+    }
+
+    .mobile-nav .tab.active {
+        border-left-color: var(--primary);
+        border-bottom-color: transparent;
+        background: var(--surface);
+    }
+
+    .mobile-nav .btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Text utilities */
+.text-capitalize {
+    text-transform: capitalize;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.badge-info {
+    background: #E0E7FF;
+    color: #3730A3;
+}
+
 /* Selection */
 ::selection {
     background: var(--primary);

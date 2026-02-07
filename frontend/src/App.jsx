@@ -3,8 +3,10 @@ import axios from 'axios';
 import Landing from './components/Landing';
 import VerificationForm from './components/VerificationForm';
 import ResultDisplay from './components/ResultDisplay';
-import Dashboard from './components/Dashboard';
+import Feed from './components/Feed';
+import Trending from './components/Trending';
 import MessageBanner from './components/MessageBanner';
+import { CheckCircle, TrendingUp, BarChart3, Menu, X } from 'lucide-react';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || '';
 
@@ -13,6 +15,7 @@ function App() {
     const [verificationResult, setVerificationResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const showMessage = (type, text) => {
         setMessage({ type, text });
@@ -27,15 +30,26 @@ function App() {
             showMessage('success', '✅ Analysis complete!');
         } catch (error) {
             console.error('Verification error:', error);
-            showMessage('error', '❌ ' + (error.response?.data?.error || 'Failed to verify text. Please try again.'));
-            setVerificationResult({ error: 'Failed to verify' });
+            const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to verify text';
+            showMessage('error', '❌ ' + errorMsg);
+            setVerificationResult(null);
         } finally {
             setLoading(false);
         }
     };
 
+    const changeView = (newView) => {
+        setView(newView);
+        setMobileMenuOpen(false);
+    };
+
     if (view === 'landing') {
-        return <Landing onGetStarted={() => setView('verify')} />;
+        return (
+            <Landing
+                onGetStarted={() => setView('verify')}
+                onBrowseFeed={() => setView('feed')}
+            />
+        );
     }
 
     return (
@@ -47,24 +61,73 @@ function App() {
                         <div className="flex items-center gap-sm">
                             <h3>Hermes</h3>
                         </div>
-                        <div className="flex gap-sm">
+
+                        {/* Desktop Navigation */}
+                        <div className="desktop-nav flex gap-sm">
                             <button
-                                onClick={() => setView('verify')}
+                                onClick={() => changeView('verify')}
                                 className={`tab ${view === 'verify' ? 'active' : ''}`}
                             >
-                                Verify
+                                <CheckCircle size={16} />
+                                Fact Check
                             </button>
                             <button
-                                onClick={() => setView('dashboard')}
-                                className={`tab ${view === 'dashboard' ? 'active' : ''}`}
+                                onClick={() => changeView('feed')}
+                                className={`tab ${view === 'feed' ? 'active' : ''}`}
                             >
-                                Dashboard
+                                <BarChart3 size={16} />
+                                Feed
                             </button>
-                            <button onClick={() => setView('landing')} className="btn btn-secondary">
+                            <button
+                                onClick={() => changeView('trending')}
+                                className={`tab ${view === 'trending' ? 'active' : ''}`}
+                            >
+                                <TrendingUp size={16} />
+                                Trending
+                            </button>
+                            <button onClick={() => changeView('landing')} className="btn btn-secondary">
                                 Home
                             </button>
                         </div>
+
+                        {/* Mobile Menu Button */}
+                        <button
+                            className="mobile-menu-btn btn btn-secondary"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        >
+                            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                        </button>
                     </div>
+
+                    {/* Mobile Navigation */}
+                    {mobileMenuOpen && (
+                        <div className="mobile-nav">
+                            <button
+                                onClick={() => changeView('verify')}
+                                className={`tab ${view === 'verify' ? 'active' : ''}`}
+                            >
+                                <CheckCircle size={16} />
+                                Fact Check
+                            </button>
+                            <button
+                                onClick={() => changeView('feed')}
+                                className={`tab ${view === 'feed' ? 'active' : ''}`}
+                            >
+                                <BarChart3 size={16} />
+                                Feed
+                            </button>
+                            <button
+                                onClick={() => changeView('trending')}
+                                className={`tab ${view === 'trending' ? 'active' : ''}`}
+                            >
+                                <TrendingUp size={16} />
+                                Trending
+                            </button>
+                            <button onClick={() => changeView('landing')} className="btn btn-secondary">
+                                Home
+                            </button>
+                        </div>
+                    )}
                 </div>
             </header>
 
@@ -75,9 +138,9 @@ function App() {
                     {view === 'verify' && (
                         <div>
                             <div className="text-center mb-xl">
-                                <h2 className="mb-md">Verify Information Accuracy</h2>
+                                <h2 className="mb-md">Fact Check Content</h2>
                                 <p className="text-secondary" style={{ maxWidth: '700px', margin: '0 auto' }}>
-                                    Submit text content to analyze for potential misinformation using advanced AI verification systems.
+                                    Submit news or factual claims for AI-powered verification. We only analyze news and public information - no personal attacks or spam.
                                 </p>
                             </div>
 
@@ -88,15 +151,27 @@ function App() {
                         </div>
                     )}
 
-                    {view === 'dashboard' && (
+                    {view === 'feed' && (
                         <div>
                             <div className="text-center mb-xl">
-                                <h2 className="mb-md">Misinformation Dashboard</h2>
+                                <h2 className="mb-md">Misinformation Feed</h2>
                                 <p className="text-secondary">
-                                    Track detected misinformation by category and view community engagement.
+                                    Browse all detected misinformation across categories. Upvote to help flag widespread false information.
                                 </p>
                             </div>
-                            <Dashboard />
+                            <Feed />
+                        </div>
+                    )}
+
+                    {view === 'trending' && (
+                        <div>
+                            <div className="text-center mb-xl">
+                                <h2 className="mb-md">Trending Misinformation</h2>
+                                <p className="text-secondary">
+                                    Most upvoted and recent misinformation detections across the platform.
+                                </p>
+                            </div>
+                            <Trending />
                         </div>
                     )}
                 </div>

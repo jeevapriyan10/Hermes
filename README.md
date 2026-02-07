@@ -1,263 +1,196 @@
-# Hermes - AI-Powered Misinformation Detection
+# Hermes AI - Misinformation Detection Platform
 
-Hermes is an advanced misinformation detection platform powered by Google's Gemini AI. It provides real-time text verification with confidence scores, category classification, and detailed explanations. Built with a clean, professional UI inspired by modern banking applications.
+![Hermes Logo](./frontend/public/favicon.png)
 
----
+**AI-powered fact-checking and misinformation detection platform built with Gemini 3 Flash**
 
-## Features
+## 🎯 Features
 
-- **AI-Powered Detection**: Utilizes Gemini 2.5 Flash for accurate misinformation analysis
-- **Confidence Scoring**: Provides detailed confidence levels for every analysis
-- **Category Classification**: Automatically categorizes content (politics, health, science, climate, etc.)
-- **Real-time Analysis**: Instant verification with comprehensive explanations
-- **Community Engagement**: Upvote system for tracking significant detections
-- **Analytics Dashboard**: View trends, category breakdowns, and statistics
-- **Clean UI**: Professional banking-style interface with Inter font
-- **MongoDB Integration**: Persistent storage for historical analysis
-- **Rate Limiting**: Built-in API protection and security
-- **Fallback System**: Grok API fallback when Gemini is unavailable
+- ✅ **Content Filtering** - AI validates content before fact-checking (rejects spam, attacks, etc.)
+- ✅ **Category-Based Grouping** - 9 color-coded categories (Politics, Health, Science, etc.)
+- ✅ **Three-Tab Navigation** - Fact Check | Feed | Trending (mobile responsive)
+- ✅ **Social Browse Mode** - Browse feed and upvote without mandatory submission
+- ✅ **Enhanced Timestamps** - Relative time display ("5m ago", "3h ago")
+- ✅ **Duplicate Detection** - AI semantic similarity clustering
+- ✅ **CSV Export** - Download top 5 trending + last 25 recent detections
 
----
+## 🚀 Quick Start
 
-## Technology Stack
+### Prerequisites
+- Node.js 18+ and npm
+- MongoDB (local or Atlas)
+- Gemini API key ([Get one here](https://aistudio.google.com/apikey))
 
-### Backend
-- **Node.js** with Express
-- **MongoDB** for data storage
-- **Gemini AI** (primary) / Grok API (fallback)
-- **Security**: Helmet, CORS, rate limiting
+### Local Development
 
-### Frontend
-- **React** 18 with Vite
-- **Axios** for API calls
-- **Lucide React** for icons
-- **Custom CSS** (LedgerKnight banking style)
+```bash
+# 1. Clone the repository
+git clone https://github.com/YOUR_USERNAME/hermes-ai.git
+cd hermes-ai
 
----
+# 2. Install dependencies
+cd backend && npm install
+cd ../frontend && npm install
 
-## Project Structure
+# 3. Configure backend environment
+cd ../backend
+cp .env.example .env
+# Edit .env and add your:
+# - MONGO_URI
+# - GEMINI_API_KEY
+
+# 4. Run backend (Terminal 1)
+npm run dev
+
+# 5. Run frontend (Terminal 2)
+cd ../frontend
+npm run dev
+
+# 6. Open browser
+# http://localhost:5173
+```
+
+## 📦 Project Structure
 
 ```
-Hermes/
+hermes/
 ├── backend/
-│   ├── routes/          # API endpoints
-│   │   ├── verify.js    # Text verification
-│   │   ├── dashboard.js # Analytics
-│   │   └── upvote.js    # Community voting
+│   ├── index.js              # Express server
+│   ├── routes/
+│   │   ├── verify.js         # Fact-check endpoint
+│   │   ├── dashboard.js      # Feed data
+│   │   ├── trending.js       # Trending endpoint
+│   │   └── export.js         # CSV export
 │   ├── services/
-│   │   ├── database.js  # MongoDB connection
-│   │   └── aiService.js # AI integration
-│   ├── index.js         # Main server
+│   │   ├── aiService.js      # Gemini AI integration
+│   │   └── similarityService.js  # Duplicate detection
 │   └── package.json
+│
 ├── frontend/
 │   ├── src/
-│   │   ├── components/  # React components
-│   │   ├── styles/      # CSS styling
-│   │   ├── App.jsx      # Main app
-│   │   └── main.jsx     # Entry point
-│   ├── index.html
-│   ├── vite.config.js
+│   │   ├── App.jsx           # Main app + navigation
+│   │   ├── components/
+│   │   │   ├── Landing.jsx   # Homepage
+│   │   │   ├── VerificationForm.jsx
+│   │   │   ├── Feed.jsx      # Feed with categories
+│   │   │   ├── Trending.jsx  # Trending view
+│   │   │   └── MessageCluster.jsx
+│   │   └── styles/
+│   │       └── index.css     # Global styles
 │   └── package.json
-├── render.yaml          # Render deployment config
-├── .env.example         # Environment template
-├── package.json         # Root scripts
+│
 └── README.md
 ```
 
----
+## 🌐 Deployment
 
-## Local Development Setup
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete step-by-step instructions to deploy on Render.com.
 
-### 1. Install Dependencies
+### Quick Deploy to Render
 
-```bash
-cd Hermes
-npm run install:all
-```
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
 
-This installs dependencies for both backend and frontend.
+1. Fork this repository
+2. Create MongoDB Atlas database
+3. Connect to Render
+4. Add environment variables
+5. Deploy!
 
-### 2. Configure Environment Variables
-
-Create `backend/.env` file:
-
+**Required Environment Variables:**
 ```env
 PORT=4000
-MONGO_URI=your_mongodb_connection_string
+NODE_ENV=production
+MONGO_URI=mongodb+srv://...
 MONGO_DB_NAME=hermes_ai
-GEMINI_API_KEY=your_gemini_api_key
-GROK_API_KEY=your_grok_api_key_optional
-CORS_ORIGIN=http://localhost:5173
+GEMINI_API_KEY=AIza...
+CORS_ORIGIN=https://your-app.onrender.com
 ```
 
-### 3. Start Backend
+## 🧪 Testing
 
-```bash
-# In one terminal
-npm run dev:backend
-```
+### Test Fact-Checking
+1. Go to "Fact Check" tab
+2. Submit: "The Earth is flat"
+3. AI analyzes and returns verdict
 
-Backend will run on http://localhost:4000
+### Test Content Filtering
+1. Submit: "You idiot!" → Rejected as personal attack
+2. Submit: "Buy my product!" → Rejected as spam
+3. Submit news → Analyzes successfully
 
-### 4. Start Frontend
+### Test Categories
+1. Go to "Feed" tab
+2. Click category buttons (Politics, Health, Science)
+3. Feed filters to show only that category
 
-```bash
-# In another terminal
-npm run dev:frontend
-```
+### Test Export
+1. Click "Export CSV" button
+2. Downloads CSV with top 5 trending + last 25 recent
 
-Frontend will run on http://localhost:5173
+## 🛠️ Tech Stack
 
-### 5. Access the Application
+### Backend
+- Node.js + Express
+- MongoDB + Mongoose
+- Gemini 3 Flash API
+- Axios, Helmet, CORS
 
-Open http://localhost:5173 in your browser.
+### Frontend
+- React + Vite
+- Lucide React (icons)
+- CSS Variables (theming)
+- Mobile-first responsive design
 
----
+## 📊 API Endpoints
 
-## API Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/verify` | Fact-check content |
+| GET | `/api/dashboard` | Get feed items |
+| GET | `/api/trending` | Get trending items |
+| POST | `/api/upvote` | Upvote an item |
+| GET | `/api/export` | Export CSV report |
+| GET | `/health` | Health check |
 
-### POST /api/verify
-Verify text for misinformation
+## 🎨 UI/UX
 
-**Request:**
-```json
-{
-  "text": "Content to verify"
-}
-```
+- Clean, professional design
+- Mobile-first responsive
+- Color-coded categories
+- Real-time relative timestamps
+- Smooth animations
+- Minimal and modern
 
-**Response:**
-```json
-{
-  "verdict": "misinformation" | "reliable",
-  "is_misinformation": boolean,
-  "confidence": 0.0-1.0,
-  "category": "politics" | "health" | "science" | ...,
-  "explanation": "Detailed explanation",
-  "analyzed_at": "ISO timestamp"
-}
-```
+## 🔐 Security
 
-### GET /api/dashboard
-Get analytics and statistics
-
-**Response:**
-```json
-{
-  "summary": [{
-    "category": "politics",
-    "count": 10,
-    "avgConfidence": 0.85,
-    "totalUpvotes": 15,
-    "items": [...]
-  }],
-  "stats": {
-    "total": 50,
-    "totalUpvotes": 100,
-    "avgConfidence": 0.78
-  }
-}
-```
-
-### POST /api/upvote
-Upvote a misinformation detection
-
-**Request:**
-```json
-{
-  "category": "politics",
-  "text": "Content that was detected"
-}
-```
-
-### GET /health
-Health check endpoint
-
----
-
-## Deployment to Render
-
-### 1. Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin your-repo-url
-git push -u origin main
-```
-
-### 2. Create Render Web Service
-
-1. Go to [Render Dashboard](https://dashboard.render.com/)
-2. Click "New +" → "Web Service"
-3. Connect your GitHub repository
-4. Render will auto-detect `render.yaml`
-
-### 3. Add Environment Variables
-
-In Render dashboard, add:
-- `MONGO_URI`: Your MongoDB connection string
-- `GEMINI_API_KEY`: Your Gemini API key
-- `GROK_API_KEY`: (Optional) Grok API key
-- `CORS_ORIGIN`: Your Render app URL (e.g., https://hermes.onrender.com)
-
-### 4. Deploy
-
-Click "Create Web Service" and Render will automatically build and deploy.
-
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PORT` | No | Server port (default: 4000) |
-| `MONGO_URI` | Yes | MongoDB connection string |
-| `MONGO_DB_NAME` | No | Database name (default: hermes_ai) |
-| `GEMINI_API_KEY` | Yes | Google Gemini API key |
-| `GROK_API_KEY` | No | Grok API key (fallback) |
-| `CORS_ORIGIN` | Yes | Frontend URL for CORS |
-
----
-
-## Features Implementation
-
-### AI Analysis
-- Primary: Gemini 2.0 Flash Exp
-- Fallback: Grok API (if configured)
-- Error handling with safe defaults
-
-### Security
 - Helmet.js for security headers
 - CORS configuration
-- Rate limiting (100 req/min global, 20 req/min for verification)
-- Input validation
-- MongoDB connection with graceful error handling
+- Rate limiting on API endpoints
+- Environment variable protection
+- Content validation before processing
 
-### UI/UX
-- Exact LedgerKnight banking style
-- Inter font family
-- Responsive design
-- Loading states
-- Error handling
-- Message banners
-- Progress indicators
+## 📈 Scaling
+
+- Free tier: 512 MB MongoDB, 750 hrs/month
+- Upgrade to Starter ($7/mo) for always-on
+- MongoDB Atlas auto-scaling available
+
+## 📝 License
+
+MIT License - feel free to use for your own projects!
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## 📧 Contact
+
+Built by Jeeva | [GitHub](https://github.com/YOUR_USERNAME)
 
 ---
 
-## License
-
-MIT License
-
----
-
-## Acknowledgements
-
-- UI design inspired by LedgerKnight
-- Powered by Google Gemini AI
-- Built with React and Node.js
-
----
-
-**Maintainer:** [jeevapriyan10](https://github.com/jeevapriyan10)
+⭐ Star this repo if you find it helpful!

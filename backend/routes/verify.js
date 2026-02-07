@@ -1,7 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const { getDB } = require('../services/database');
-const { analyzeText } = require('../services/aiService');
+const { analyzeText, validateContent } = require('../services/aiService');
+
+// Helper function for content rejection messages
+function getContentRejectionMessage(contentType) {
+    const messages = {
+        personal_attack: '⚠️ This appears to be a personal attack. Our platform is designed for fact-checking news and public information, not personal disputes.',
+        hate_speech: '🚫 Hate speech is not allowed on this platform. Please refrain from posting content that targets individuals or groups.',
+        threat: '🚨 This content contains threats or harassment. Such content violates our terms and may be reported to authorities.',
+        spam: '❌ This appears to be spam or repetitive content. Please submit genuine news or informational content for verification.',
+        promotional: '📢 Promotional content is not suitable for fact-checking. This platform is for verifying news and factual claims.',
+        private: '🔒 This appears to be private conversation content. Please only submit public news or informational statements.',
+        cyberbullying: '⛔ Cyberbullying content is strictly prohibited. This platform is for fact-checking news, not personal attacks.',
+        unknown: '❓ This content doesn\'t appear to be news or factual information suitable for fact-checking.'
+    };
+    return messages[contentType] || messages.unknown;
+}
+
 
 router.post('/', async (req, res) => {
     try {
@@ -20,21 +36,50 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Text is too long (max 5000 characters)' });
         }
 
+        // Validate content type (reject non-news content)
+        const validation = await validateContent(text.trim());
+
+        if (!validation.isValid) {
+            return res.status(400).json({
+                error: 'Content not suitable for fact-checking',
+                reason: validation.rejectionReason,
+                contentType: validation.contentType,
+                message: getContentRejectionMessage(validation.contentType)
+            });
+        }
+
         // Analyze with AI
         const aiResult = await analyzeText(text.trim());
 
         // Store in database if misinformation detected
         const db = getDB();
+        let insertedId = null;
+
         if (db && aiResult.is_misinformation) {
             try {
-                await db.collection('misinformation').insertOne({
+                const insertResult = await db.collection('misinformation').insertOne({
                     text: text.trim(),
                     category: aiResult.category,
                     confidence: aiResult.confidence,
                     explanation: aiResult.explanation,
                     timestamp: new Date(),
                     upvotes: 0,
+                    clusterId: null,
+                    isClusterHead: false,
+                    messageTemplate: null,
+                    variations: 0
                 });
+
+                insertedId = insertResult.insertedId;
+
+                // Check for similar messages and create/update cluster
+                const { findSimilarMessages, updateMessageCluster } = require('../services/similarityService');
+                const similarMessages = await findSimilarMessages(text.trim());
+
+                if (similarMessages.length > 0) {
+                    await updateMessageCluster(insertedId, similarMessages);
+                }
+
             } catch (dbError) {
                 console.error('❌ Database error:', dbError.message);
                 // Continue even if DB insert fails

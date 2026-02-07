@@ -55,6 +55,8 @@ connectDB().catch((err) => {
 app.use('/api/verify', verifyLimiter, require('./routes/verify'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/upvote', require('./routes/upvote'));
+app.use('/api/trending', require('./routes/trending'));
+app.use('/api/export', require('./routes/export'));
 
 // Serve static files from frontend build (for Render deployment)
 const frontendPath = path.join(__dirname, '../frontend/dist');

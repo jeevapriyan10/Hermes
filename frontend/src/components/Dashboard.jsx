@@ -29,7 +29,6 @@ export default function Dashboard() {
     const handleUpvote = async (itemId) => {
         try {
             await axios.post(`${BACKEND}/api/upvote`, { id: itemId });
-            // Refresh data after upvote
             fetchDashboard();
         } catch (error) {
             console.error('Upvote failed:', error);
@@ -62,7 +61,7 @@ export default function Dashboard() {
                         borderTopColor: 'var(--primary)',
                         margin: '0 auto 1rem'
                     }} />
-                    <p className="text-secondary">Loading feed...</p>
+                    <p className="text-secondary">Loading dashboard...</p>
                 </div>
             </div>
         );
@@ -70,130 +69,102 @@ export default function Dashboard() {
 
     if (error) {
         return (
-            <div className="alert alert-warning">
-                <p>{error}</p>
-                <button onClick={fetchDashboard} className="btn btn-secondary" style={{ marginTop: '1rem' }}>
-                    Retry
-                </button>
-            </div>
-        );
-    }
-
-    if (!data || !data.items || data.items.length === 0) {
-        return (
             <div className="card">
-                <div className="info-box">
-                    <p>No misinformation detected yet. Be the first to verify content!</p>
+                <div className="alert alert-error">
+                    <p>{error}</p>
                 </div>
             </div>
         );
     }
 
-    const { items, stats } = data;
+    const items = data?.items || [];
+    const stats = data?.stats || {};
 
     return (
         <div>
             {/* Stats Overview */}
-            <div className="grid grid-2 mb-xl">
+            <div className="grid grid-4 mb-xl">
                 <div className="stat-card">
-                    <AlertTriangle size={32} color="var(--error)" style={{ margin: '0 auto 0.5rem' }} />
                     <div className="stat-value">{stats.total || 0}</div>
                     <div className="stat-label">Total Detections</div>
                 </div>
                 <div className="stat-card">
-                    <ThumbsUp size={32} color="var(--success)" style={{ margin: '0 auto 0.5rem' }} />
                     <div className="stat-value">{stats.totalUpvotes || 0}</div>
-                    <div className="stat-label">Community Upvotes</div>
+                    <div className="stat-label">Community Votes</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-value">{items.length}</div>
+                    <div className="stat-label">Recent Items</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-value">
+                        {new Set(items.map(i => i.category)).size}
+                    </div>
+                    <div className="stat-label">Categories</div>
                 </div>
             </div>
 
-            {/* Social Feed Header */}
-            <div className="flex items-center justify-between mb-lg">
-                <h3 className="flex items-center gap-sm">
-                    <TrendingUp size={24} />
-                    Misinformation Feed
-                </h3>
-                <span className="text-sm text-secondary">{items.length} detections</span>
-            </div>
-
-            {/* Feed Items */}
-            <div className="grid gap-lg">
-                {items.map((item) => (
-                    <div key={item._id} className="card" style={{ borderLeft: '4px solid var(--error)' }}>
-                        {/* Item Header */}
-                        <div className="flex items-center justify-between mb-md">
-                            <div className="flex items-center gap-sm">
-                                <span className="badge badge-declined">
-                                    <AlertTriangle size={12} /> Misinformation
-                                </span>
-                                <span className="badge badge-review text-capitalize">
-                                    {item.category || 'general'}
-                                </span>
-                            </div>
-                            <span className="text-xs text-secondary flex items-center gap-xs">
-                                <Calendar size={12} />
-                                {formatDate(item.timestamp)}
-                            </span>
-                        </div>
-
-                        {/* Detected Text */}
-                        <div className="mb-md">
-                            <p className="text-sm font-medium mb-xs">Detected Content:</p>
-                            <div className="info-box">
-                                <p className="text-sm" style={{ whiteSpace: 'pre-wrap' }}>
-                                    {item.text}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Explanation */}
-                        <div className="mb-md">
-                            <p className="text-sm font-medium mb-xs">Analysis:</p>
-                            <p className="text-sm text-secondary">{item.explanation}</p>
-                        </div>
-
-                        {/* Confidence Bar */}
-                        <div className="mb-md">
-                            <div className="flex items-center justify-between mb-xs">
-                                <span className="text-xs font-medium">AI Confidence</span>
-                                <span className="text-xs font-semibold text-error">
-                                    {Math.round((item.confidence || 0) * 100)}%
-                                </span>
-                            </div>
-                            <div style={{
-                                height: '6px',
-                                background: 'var(--surface)',
-                                borderRadius: '3px',
-                                overflow: 'hidden'
-                            }}>
-                                <div style={{
-                                    width: `${Math.round((item.confidence || 0) * 100)}%`,
-                                    height: '100%',
-                                    background: 'var(--error)',
-                                    transition: 'width 0.3s ease'
-                                }} />
-                            </div>
-                        </div>
-
-                        {/* Upvote Section */}
-                        <div className="flex items-center justify-between" style={{
-                            paddingTop: '0.75rem',
-                            borderTop: '1px solid var(--border)'
-                        }}>
-                            <button
-                                onClick={() => handleUpvote(item._id)}
-                                className="btn btn-secondary"
-                                style={{ fontSize: '0.75rem', padding: '0.5rem 1rem' }}
-                            >
-                                <ThumbsUp size={14} />
-                                Upvote ({item.upvotes || 0})
-                            </button>
-                            <span className="text-xs text-secondary">
-                                Help validate this detection
-                            </span>
-                        </div>
+            {/* Feed */}
+            <div className="card">
+                <div className="flex items-center justify-between mb-lg">
+                    <div className="flex items-center gap-sm">
+                        <BarChart size={24} style={{ color: 'var(--primary)' }} />
+                        <h2>Recent Detections</h2>
                     </div>
-                ))}
+                    <span className="text-sm text-secondary">{items.length} items</span>
+                </div>
+
+                {items.length === 0 ? (
+                    <div className="info-box text-center">
+                        <p>No misinformation detected yet. Submit content to get started!</p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        {items.map((item) => (
+                            <div key={item._id} className="card" style={{ background: 'var(--surface)', margin: 0 }}>
+                                <div className="flex items-start justify-between gap-md mb-sm">
+                                    <span className="badge badge-declined text-capitalize">
+                                        {item.category || 'general'}
+                                    </span>
+                                    <span className="text-xs text-secondary flex items-center gap-xs">
+                                        <Calendar size={12} />
+                                        {formatDate(item.timestamp)}
+                                    </span>
+                                </div>
+
+                                <p className="mb-sm" style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>
+                                    <strong>"{item.text}"</strong>
+                                </p>
+
+                                <div className="info-box mb-sm">
+                                    <p className="text-sm">{item.explanation}</p>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-sm">
+                                        <span className="badge badge-review">
+                                            <AlertTriangle size={12} />
+                                            {Math.round(item.confidence * 100)}% confidence
+                                        </span>
+                                        {item.variations > 0 && (
+                                            <span className="badge badge-info">
+                                                {item.variations} variations
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => handleUpvote(item._id)}
+                                        className="btn btn-secondary"
+                                        style={{ padding: '6px 12px', fontSize: '0.875rem' }}
+                                    >
+                                        <ThumbsUp size={14} />
+                                        {item.upvotes || 0}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
