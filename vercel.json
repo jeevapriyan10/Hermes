@@ -1,28 +1,12 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "frontend/package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist"
-            }
-        }
-    ],
+    "buildCommand": "cd frontend && npm install && npm run build",
+    "outputDirectory": "frontend/dist",
+    "installCommand": "npm install --prefix backend && npm install --prefix frontend",
     "rewrites": [
         {
-            "source": "/api/:path*",
-            "destination": "/backend/index.js"
-        },
-        {
-            "source": "/health",
-            "destination": "/backend/index.js"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
-    ],
-    "functions": {
-        "backend/index.js": {
-            "memory": 1024,
-            "maxDuration": 10
-        }
-    }
+    ]
 }
