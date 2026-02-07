@@ -23,8 +23,16 @@
             "dest": "backend/index.js"
         },
         {
+            "src": "/favicon\\.(ico|svg|png)",
+            "dest": "frontend/dist/favicon.svg"
+        },
+        {
             "src": "/(.*)",
             "dest": "frontend/dist/$1"
+        },
+        {
+            "src": "/",
+            "dest": "frontend/dist/index.html"
         }
     ],
     "env": {
