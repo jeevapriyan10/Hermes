@@ -12,7 +12,7 @@ const validateContent = async (text) => {
         }
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
             {
                 contents: [{
                     parts: [{
@@ -64,21 +64,21 @@ const callGeminiAPI = async (text) => {
             throw new Error('Gemini API key not configured');
         }
 
-        console.log('✅ Using Gemini API key:', apiKey.substring(0, 10) + '...');
+        console.log('✅ Using Gemini API (gemini-pro)');
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
             {
                 contents: [{
                     parts: [{
-                        text: `You are an expert fact-checker. Analyze the following text for misinformation, false claims, or misleading information.
+                        text: `You are an expert fact-checker. Analyze this text for misinformation.
 
-Respond ONLY with valid JSON (no markdown, no code blocks):
+Respond ONLY with valid JSON:
 {
-  "is_misinformation": true,
+  "is_misinformation": false,
   "confidence": 0.85,
-  "category": "politics",
-  "explanation": "Brief explanation"
+  "category": "general",
+  "explanation": "Your analysis"
 }
 
 Text: "${text.replace(/"/g, '\\"')}"`
@@ -97,26 +97,16 @@ Text: "${text.replace(/"/g, '\\"')}"`
 
         const content = response.data.candidates[0].content.parts[0].text;
 
-        // Try to parse JSON with multiple strategies
+        // Parse JSON from response
         let result;
         try {
             result = JSON.parse(content);
-        } catch (e1) {
-            try {
-                const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
-                if (codeBlockMatch) {
-                    result = JSON.parse(codeBlockMatch[1]);
-                } else {
-                    const jsonMatch = content.match(/\{[\s\S]*\}/);
-                    if (jsonMatch) {
-                        result = JSON.parse(jsonMatch[0]);
-                    } else {
-                        throw new Error('No JSON found');
-                    }
-                }
-            } catch (e2) {
-                console.error('JSON parse failed:', content);
-                throw new Error('Invalid JSON response');
+        } catch (e) {
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                result = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('No JSON in response');
             }
         }
 
@@ -133,45 +123,96 @@ Text: "${text.replace(/"/g, '\\"')}"`
 };
 
 /**
- * Call Grok API for misinformation detection (optional fallback)
+ * Call Groq API for misinformation detection
  */
-const callGrokAPI = async (text) => {
+const callGroqAPI = async (text) => {
     try {
         const apiKey = process.env.GROK_API_KEY;
 
-        if (!apiKey || apiKey.includes('your_grok')) {
-            throw new Error('Grok API key not configured');
+        if (!apiKey || apiKey.trim() === '' || apiKey.includes('your_grok')) {
+            throw new Error('Groq API key not configured');
         }
 
-        throw new Error('Grok API integration pending');
+        console.log('✅ Using Groq API (llama3-8b-8192)');
+
+        const response = await axios.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            {
+                model: 'llama3-8b-8192',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are an expert fact-checker. Analyze text for misinformation and respond only with valid JSON in this format: {"is_misinformation": false, "confidence": 0.85, "category": "general", "explanation": "Your analysis"}'
+                    },
+                    {
+                        role: 'user',
+                        content: `Analyze this text: "${text.replace(/"/g, '\\"')}"`
+                    }
+                ],
+                temperature: 0.3,
+                max_tokens: 500,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                timeout: 20000,
+            }
+        );
+
+        const content = response.data.choices[0].message.content;
+
+        // Parse JSON from response
+        let result;
+        try {
+            result = JSON.parse(content);
+        } catch (e) {
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                result = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('No JSON in Groq response');
+            }
+        }
+
+        return {
+            is_misinformation: Boolean(result.is_misinformation),
+            confidence: Math.min(Math.max(Number(result.confidence) || 0.5, 0), 1),
+            category: result.category || 'general',
+            explanation: result.explanation || 'Analysis completed',
+        };
     } catch (error) {
-        console.error('❌ Grok API error:', error.message);
+        console.error('❌ Groq API error:', error.response?.data || error.message);
         throw error;
     }
 };
 
 /**
- * Analyze text with fallback logic
+ * Analyze text with fallback: Gemini -> Groq -> Fallback message
  */
 const analyzeText = async (text) => {
+    // Try Gemini first
     try {
         return await callGeminiAPI(text);
     } catch (geminiError) {
-        console.log('⚠️  Gemini failed, trying Grok...');
+        console.log('⚠️  Gemini failed, trying Groq...');
 
+        // Try Groq as fallback
         try {
-            return await callGrokAPI(text);
-        } catch (grokError) {
-            console.error('❌ AI Analysis Failed (Gemini & Grok):', {
+            return await callGroqAPI(text);
+        } catch (groqError) {
+            console.error('❌ AI Analysis Failed (Gemini & Groq):', {
                 gemini: geminiError?.message,
-                grok: grokError?.message
+                groq: groqError?.message
             });
 
+            // Final fallback: return safe default
             return {
                 is_misinformation: false,
                 confidence: 0.0,
                 category: 'general',
-                explanation: 'AI analysis service is temporarily unavailable (API Key issue or quota exceeded). Please try again later.',
+                explanation: 'AI analysis temporarily unavailable. Both Gemini and Groq services failed. Please try again later.',
             };
         }
     }
@@ -180,6 +221,6 @@ const analyzeText = async (text) => {
 module.exports = {
     validateContent,
     callGeminiAPI,
-    callGrokAPI,
+    callGroqAPI,
     analyzeText,
 };
