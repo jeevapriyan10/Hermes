@@ -1,3 +1,4 @@
+// Production deployment - all routes hardened with error handling
 const { MongoClient } = require('mongodb');
 
 let db = null;
