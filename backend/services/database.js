@@ -38,7 +38,7 @@ const connectDB = async () => {
             console.error('❌ MongoDB connection error:', error.message);
             db = null;
             client = null;
-            throw error; // Propagate error so checking code knows it failed
+            return null; // Return null instead of throwing
         } finally {
             connectionPromise = null; // Reset promise wrapper
         }
