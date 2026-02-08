@@ -12,7 +12,7 @@ const validateContent = async (text) => {
         }
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
                 contents: [{
                     parts: [{
@@ -23,7 +23,7 @@ ONLY ALLOW: News, factual claims, public information, historical events, scienti
 REJECT: Personal attacks, hate speech, threats, harassment, doxxing, spam, promotional content, private conversations, trash talk, cyberbullying
 
 Respond ONLY with valid JSON:
-{"isValid": boolean, "contentType": "news"|"personal_attack"|"hate_speech"|"threat"|"spam"|"promotional"|"private"|"cyberbullying"|"unknown", "rejectionReason": "Brief explanation if rejected, null if valid"}
+{"isValid": true, "contentType": "news", "rejectionReason": null}
 
 Text: "${text.replace(/"/g, '\\"')}"`
                     }]
@@ -67,27 +67,23 @@ const callGeminiAPI = async (text) => {
         console.log('✅ Using Gemini API key:', apiKey.substring(0, 10) + '...');
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: `You are an expert fact-checker. Analyze the following text for misinformation, false claims, or misleading information.
+                contents: [{
+                    parts: [{
+                        text: `You are an expert fact-checker. Analyze the following text for misinformation, false claims, or misleading information.
 
-Respond ONLY with valid JSON in this exact format:
+Respond ONLY with valid JSON (no markdown, no code blocks):
 {
-  "is_misinformation": boolean,
-  "confidence": number between 0 and 1,
-  "category": "politics" | "health" | "science" | "climate" | "technology" | "finance" | "entertainment" | "general",
-  "explanation": "Brief explanation of your verdict"
+  "is_misinformation": true,
+  "confidence": 0.85,
+  "category": "politics",
+  "explanation": "Brief explanation"
 }
 
-Text to analyze: "${text.replace(/"/g, '\\"')}"`,
-                            },
-                        ],
-                    },
-                ],
+Text: "${text.replace(/"/g, '\\"')}"`
+                    }]
+                }],
                 generationConfig: {
                     temperature: 0.3,
                     maxOutputTokens: 500,
@@ -95,27 +91,41 @@ Text to analyze: "${text.replace(/"/g, '\\"')}"`,
             },
             {
                 headers: { 'Content-Type': 'application/json' },
-                timeout: 15000,
+                timeout: 20000,
             }
         );
 
         const content = response.data.candidates[0].content.parts[0].text;
 
-        // Extract JSON from response
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            const result = JSON.parse(jsonMatch[0]);
-
-            // Validate and normalize result
-            return {
-                is_misinformation: Boolean(result.is_misinformation),
-                confidence: Math.min(Math.max(Number(result.confidence) || 0.5, 0), 1),
-                category: result.category || 'general',
-                explanation: result.explanation || 'Analysis completed',
-            };
+        // Try to parse JSON with multiple strategies
+        let result;
+        try {
+            result = JSON.parse(content);
+        } catch (e1) {
+            try {
+                const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+                if (codeBlockMatch) {
+                    result = JSON.parse(codeBlockMatch[1]);
+                } else {
+                    const jsonMatch = content.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        result = JSON.parse(jsonMatch[0]);
+                    } else {
+                        throw new Error('No JSON found');
+                    }
+                }
+            } catch (e2) {
+                console.error('JSON parse failed:', content);
+                throw new Error('Invalid JSON response');
+            }
         }
 
-        throw new Error('Invalid JSON response from Gemini');
+        return {
+            is_misinformation: Boolean(result.is_misinformation),
+            confidence: Math.min(Math.max(Number(result.confidence) || 0.5, 0), 1),
+            category: result.category || 'general',
+            explanation: result.explanation || 'Analysis completed',
+        };
     } catch (error) {
         console.error('❌ Gemini API error:', error.response?.data || error.message);
         throw error;
@@ -133,8 +143,6 @@ const callGrokAPI = async (text) => {
             throw new Error('Grok API key not configured');
         }
 
-        // Placeholder for Grok API integration
-        // Update with actual Grok API endpoint when available
         throw new Error('Grok API integration pending');
     } catch (error) {
         console.error('❌ Grok API error:', error.message);
@@ -146,13 +154,11 @@ const callGrokAPI = async (text) => {
  * Analyze text with fallback logic
  */
 const analyzeText = async (text) => {
-    // Try Gemini first
     try {
         return await callGeminiAPI(text);
     } catch (geminiError) {
         console.log('⚠️  Gemini failed, trying Grok...');
 
-        // Try Grok as fallback
         try {
             return await callGrokAPI(text);
         } catch (grokError) {
@@ -161,11 +167,10 @@ const analyzeText = async (text) => {
                 grok: grokError?.message
             });
 
-            // Final fallback: return safe default with explanation
             return {
                 is_misinformation: false,
                 confidence: 0.0,
-                category: 'general', // Default category
+                category: 'general',
                 explanation: 'AI analysis service is temporarily unavailable (API Key issue or quota exceeded). Please try again later.',
             };
         }
