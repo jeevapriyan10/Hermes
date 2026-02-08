@@ -83,15 +83,15 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server (only for local development)
-if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 4000;
-    app.listen(PORT, () => {
-        console.log(`\n🚀 GrandWarden Backend running on port ${PORT}`);
-        console.log(`📡 Health check: http://localhost:${PORT}/health`);
-        console.log(`🌐 CORS enabled for: ${corsOrigin}\n`);
-    });
-}
+// Start server - works for both Render and local development
+const PORT = process.env.PORT || 4000;
+const HOST = process.env.RENDER ? '0.0.0.0' : 'localhost';
 
-// Export for Vercel
+app.listen(PORT, HOST, () => {
+    console.log(`\n🚀 GrandWarden Backend running on port ${PORT}`);
+    console.log(`📡 Health check: http://localhost:${PORT}/health`);
+    console.log(`🌐 CORS enabled for: ${corsOrigin}\n`);
+});
+
+// Export for Vercel serverless (won't be used on Render)
 module.exports = app;
