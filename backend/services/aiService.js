@@ -12,7 +12,7 @@ const validateContent = async (text) => {
         }
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-3.0-flash:generateContent?key=${apiKey}`,
             {
                 contents: [{
                     parts: [{
@@ -64,10 +64,10 @@ const callGeminiAPI = async (text) => {
             throw new Error('Gemini API key not configured');
         }
 
-        console.log('✅ Using Gemini API (gemini-1.5-flash)');
+        console.log('✅ Using Gemini API (gemini-3.0-flash)');
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-3.0-flash:generateContent?key=${apiKey}`,
             {
                 contents: [{
                     parts: [{
