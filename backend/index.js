@@ -83,15 +83,18 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server - works for both Render and local development
-const PORT = process.env.PORT || 4000;
-const HOST = process.env.RENDER ? '0.0.0.0' : 'localhost';
+// Start server - works for Render (direct execution)
+// Skip for Vercel (imported as module)
+if (require.main === module) {
+    const PORT = process.env.PORT || 4000;
+    const HOST = process.env.RENDER ? '0.0.0.0' : 'localhost';
 
-app.listen(PORT, HOST, () => {
-    console.log(`\n🚀 GrandWarden Backend running on port ${PORT}`);
-    console.log(`📡 Health check: http://localhost:${PORT}/health`);
-    console.log(`🌐 CORS enabled for: ${corsOrigin}\n`);
-});
+    app.listen(PORT, HOST, () => {
+        console.log(`\n🚀 GrandWarden Backend running on port ${PORT}`);
+        console.log(`📡 Health check: http://localhost:${PORT}/health`);
+        console.log(`🌐 CORS enabled for: ${corsOrigin}\n`);
+    });
+}
 
-// Export for Vercel serverless (won't be used on Render)
+// Export for Vercel serverless
 module.exports = app;
