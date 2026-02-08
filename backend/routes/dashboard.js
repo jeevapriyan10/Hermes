@@ -46,6 +46,7 @@ router.get('/', async (req, res) => {
         console.error('Dashboard error:', error.message);
         res.status(500).json({
             error: 'Failed to fetch dashboard data',
+            details: error.message, // Exposed for debugging
             items: [],
         });
     }

@@ -6,14 +6,14 @@ const { analyzeText, validateContent } = require('../services/aiService');
 // Helper function for content rejection messages
 function getContentRejectionMessage(contentType) {
     const messages = {
-        personal_attack: '⚠️ This appears to be a personal attack. Our platform is designed for fact-checking news and public information, not personal disputes.',
-        hate_speech: '🚫 Hate speech is not allowed on this platform. Please refrain from posting content that targets individuals or groups.',
-        threat: '🚨 This content contains threats or harassment. Such content violates our terms and may be reported to authorities.',
-        spam: '❌ This appears to be spam or repetitive content. Please submit genuine news or informational content for verification.',
-        promotional: '📢 Promotional content is not suitable for fact-checking. This platform is for verifying news and factual claims.',
-        private: '🔒 This appears to be private conversation content. Please only submit public news or informational statements.',
-        cyberbullying: '⛔ Cyberbullying content is strictly prohibited. This platform is for fact-checking news, not personal attacks.',
-        unknown: '❓ This content doesn\'t appear to be news or factual information suitable for fact-checking.'
+        personal_attack: 'This appears to be a personal attack. Our platform is designed for fact-checking news and public information, not personal disputes.',
+        hate_speech: 'Hate speech is not allowed on this platform. Please refrain from posting content that targets individuals or groups.',
+        threat: 'This content contains threats or harassment. Such content violates our terms and may be reported to authorities.',
+        spam: 'This appears to be spam or repetitive content. Please submit genuine news or informational content for verification.',
+        promotional: 'Promotional content is not suitable for fact-checking. This platform is for verifying news and factual claims.',
+        private: 'This appears to be private conversation content. Please only submit public news or informational statements.',
+        cyberbullying: 'Cyberbullying content is strictly prohibited. This platform is for fact-checking news, not personal attacks.',
+        unknown: 'This content doesn\'t appear to be news or factual information suitable for fact-checking.'
     };
     return messages[contentType] || messages.unknown;
 }
@@ -99,7 +99,7 @@ router.post('/', async (req, res) => {
         console.error('Verification error:', error.message);
         res.status(500).json({
             error: 'Failed to verify text. Please try again.',
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+            details: error.message,
         });
     }
 });

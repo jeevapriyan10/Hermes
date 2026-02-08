@@ -67,6 +67,7 @@ router.get('/', async (req, res) => {
         console.error('Trending error:', error.message);
         res.status(500).json({
             error: 'Failed to fetch trending data',
+            details: error.message,
             items: []
         });
     }

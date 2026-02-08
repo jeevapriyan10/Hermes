@@ -153,14 +153,17 @@ const analyzeText = async (text) => {
         try {
             return await callGrokAPI(text);
         } catch (grokError) {
-            console.log('⚠️  Grok also failed, using fallback response');
+            console.error('❌ AI Analysis Failed (Gemini & Grok):', {
+                gemini: geminiError?.message,
+                grok: grokError?.message
+            });
 
-            // Final fallback: return safe default
+            // Final fallback: return safe default with explanation
             return {
                 is_misinformation: false,
                 confidence: 0.0,
-                category: 'unknown',
-                explanation: 'Unable to analyze due to API errors. Please try again later.',
+                category: 'general', // Default category
+                explanation: 'AI analysis service is temporarily unavailable. Please try again later.',
             };
         }
     }
