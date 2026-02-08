@@ -8,9 +8,18 @@
     "dev:frontend": "cd frontend && npm run dev",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm run build",
-    "start": "cd backend && node index.js"
+    "start": "cd backend && node index.js",
+    "dev": "npx concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
   },
-  "keywords": ["misinformation", "ai", "gemini", "detection"],
+  "keywords": [
+    "misinformation",
+    "ai",
+    "gemini",
+    "detection"
+  ],
   "author": "jeevapriyan10",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Download, TrendingUp, BarChart, Calendar, AlertTriangle, ThumbsUp } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const CATEGORIES = [
     { id: 'all', label: 'All', color: '#6B7280' },
